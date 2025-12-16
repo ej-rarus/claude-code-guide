@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Guide</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--dark-light);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 24px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-section {
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray);
+            padding: 16px 12px 8px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--white);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-folder {
+            cursor: pointer;
+        }
+
+        .nav-folder-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 20px;
+        }
+
+        .nav-folder.open .nav-folder-content {
+            max-height: 500px;
+        }
+
+        .nav-folder-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-folder-header .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-folder.open .nav-folder-header .arrow {
+            transform: rotate(90deg);
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            width: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 0.95rem;
+            width: 100%;
+            margin-left: 12px;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--gray);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--gray);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--white);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 40px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 32px;
+            max-width: 600px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        /* Content Sections */
+        .content {
+            padding: 60px 40px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Command Box */
+        .command-section {
+            margin-top: 40px;
+        }
+
+        .command-box {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .command-header {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .command-header span {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+        }
+
+        .copy-btn.copied {
+            color: var(--success);
+        }
+
+        .command-content {
+            padding: 20px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #e6edf3;
+            line-height: 1.8;
+        }
+
+        .command-content .comment {
+            color: #8b949e;
+        }
+
+        .command-content .string {
+            color: #a5d6ff;
+        }
+
+        .command-content .keyword {
+            color: #ff7b72;
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 24px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(255,255,255,0.05);
+            padding: 16px 24px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+
+        tr {
+            transition: background 0.2s ease;
+        }
+
+        tr:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        td code {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Tips */
+        .tip-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+            display: flex;
+            gap: 16px;
+        }
+
+        .tip-box.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .tip-box i {
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .tip-box.warning i {
+            color: var(--warning);
+        }
+
+        .tip-content h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .tip-content p {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Feature List */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .feature-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .feature-item.available i {
+            color: var(--success);
+        }
+
+        .feature-item.unavailable i {
+            color: var(--danger);
+        }
+
+        .feature-item span {
+            font-size: 0.95rem;
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 24px 0;
+        }
+
+        .accordion-item {
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .accordion-header h4 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .accordion-header i.arrow {
+            transition: transform 0.3s ease;
+            color: var(--gray);
+        }
+
+        .accordion-item.open .accordion-header i.arrow {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-item.open .accordion-content {
+            max-height: 1000px;
+        }
+
+        .accordion-body {
+            padding: 0 24px 24px;
+            color: var(--gray);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: var(--success);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--white);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(80vh - 80px);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 200;
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--dark-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle -->
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="logo">
+                <div class="logo-icon"><i class="fas fa-robot"></i></div>
+                <span>Claude Code</span>
+            </a>
+        </div>
+
+        <nav>
+            <div class="nav-section">
+                <div class="nav-section-title">시작하기</div>
+                <a class="nav-item active" data-section="home" onclick="showSection('home')">
+                    <i class="fas fa-home"></i>
+                    <span>홈</span>
+                </a>
+                <a class="nav-item" data-section="quickstart" onclick="showSection('quickstart')">
+                    <i class="fas fa-rocket"></i>
+                    <span>빠른 시작</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">기능 가이드</div>
+                <div class="nav-folder" onclick="toggleFolder(this)">
+                    <div class="nav-item nav-folder-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="fas fa-file-export"></i>
+                            <span>파일 변환</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow"></i>
+                    </div>
+                    <div class="nav-folder-content">
+                        <a class="nav-item" data-section="convert-ppt" onclick="showSection('convert-ppt')">
+                            <i class="fas fa-file-powerpoint"></i>
+                            <span>PPT → MD</span>
+                        </a>
+                        <a class="nav-item" data-section="convert-pdf" onclick="showSection('convert-pdf')">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF → MD</span>
+                        </a>
+                        <a class="nav-item" data-section="convert-image" onclick="showSection('convert-image')">
+                            <i class="fas fa-image"></i>
+                            <span>이미지 → 텍스트</span>
+                        </a>
+                        <a class="nav-item" data-section="convert-excel" onclick="showSection('convert-excel')">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Excel → 테이블</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="nav-folder" onclick="toggleFolder(this)">
+                    <div class="nav-item nav-folder-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="fas fa-edit"></i>
+                            <span>문서 작성</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow"></i>
+                    </div>
+                    <div class="nav-folder-content">
+                        <a class="nav-item" data-section="doc-create" onclick="showSection('doc-create')">
+                            <i class="fas fa-plus"></i>
+                            <span>새 문서 생성</span>
+                        </a>
+                        <a class="nav-item" data-section="doc-edit" onclick="showSection('doc-edit')">
+                            <i class="fas fa-pencil-alt"></i>
+                            <span>문서 수정</span>
+                        </a>
+                        <a class="nav-item" data-section="doc-template" onclick="showSection('doc-template')">
+                            <i class="fas fa-copy"></i>
+                            <span>템플릿 활용</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a class="nav-item" data-section="analysis" onclick="showSection('analysis')">
+                    <i class="fas fa-search"></i>
+                    <span>문서 분석</span>
+                </a>
+                <a class="nav-item" data-section="web" onclick="showSection('web')">
+                    <i class="fas fa-globe"></i>
+                    <span>웹 정보 수집</span>
+                </a>
+                <a class="nav-item" data-section="automation" onclick="showSection('automation')">
+                    <i class="fas fa-magic"></i>
+                    <span>자동화</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">레퍼런스</div>
+                <a class="nav-item" data-section="examples" onclick="showSection('examples')">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>실전 예시</span>
+                </a>
+                <a class="nav-item" data-section="tips" onclick="showSection('tips')">
+                    <i class="fas fa-star"></i>
+                    <span>유용한 팁</span>
+                </a>
+                <a class="nav-item" data-section="limits" onclick="showSection('limits')">
+                    <i class="fas fa-info-circle"></i>
+                    <span>가능/불가능</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="search-box">
+                <i class="fas fa-search" style="color: var(--gray);"></i>
+                <input type="text" placeholder="검색어를 입력하세요..." id="searchInput" onkeyup="handleSearch(event)">
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-ghost" onclick="openModal('shortcut')">
+                    <i class="fas fa-keyboard"></i>
+                    단축키
+                </button>
+                <button class="btn btn-primary" onclick="openModal('help')">
+                    <i class="fas fa-question-circle"></i>
+                    도움말
+                </button>
+            </div>
+        </div>
+
+        <!-- Home Section -->
+        <section class="section active" id="home">
+            <div class="hero">
+                <div class="hero-content">
+                    <span class="hero-badge">
+                        <i class="fas fa-sparkles"></i>
+                        AI-Powered Document Assistant
+                    </span>
+                    <h1>Claude Code<br>문서 작업 가이드</h1>
+                    <p>AI와 함께하는 스마트한 문서 작업. 파일 변환, 문서 생성, 자동화까지 모든 것을 한 곳에서.</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="showSection('quickstart')">
+                            <i class="fas fa-play"></i>
+                            시작하기
+                        </button>
+                        <button class="btn btn-ghost" onclick="showSection('examples')">
+                            <i class="fas fa-book"></i>
+                            예시 보기
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-file-alt"></i>
+                        <div class="number">10+</div>
+                        <div class="label">지원 파일 형식</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bolt"></i>
+                        <div class="number">100x</div>
+                        <div class="label">작업 속도 향상</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-cogs"></i>
+                        <div class="number">50+</div>
+                        <div class="label">자동화 명령어</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="number">24/7</div>
+                        <div class="label">언제든 사용 가능</div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2>주요 기능</h2>
+                    <p>Claude Code로 할 수 있는 다양한 문서 작업을 살펴보세요.</p>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card" onclick="showSection('convert-ppt')">
+                        <div class="card-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <h3>파일 변환</h3>
+                        <p>PPT, PDF, 이미지, Excel 등 다양한 파일을 마크다운으로 변환합니다.</p>
+                        <div class="card-tags">
+                            <span class="tag">PPT</span>
+                            <span class="tag">PDF</span>
+                            <span class="tag">OCR</span>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="showSection('doc-create')">
+                        <div class="card-icon"><i class="fas fa-file-signature"></i></div>
+                        <h3>문서 생성</h3>
+                        <p>회의록, 기획서, API 문서 등 다양한 형식의 문서를 자동으로 생성합니다.</p>
+                        <div class="card-tags">
+                            <span class="tag">회의록</span>
+                            <span class="tag">기획서</span>
+                            <span class="tag">템플릿</span>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="showSection('analysis')">
+                        <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
+                        <h3>문서 분석</h3>
+                        <p>긴 문서를 요약하고, 핵심 내용을 추출하며, 문서 간 비교 분석을 수행합니다.</p>
+                        <div class="card-tags">
+                            <span class="tag">요약</span>
+                            <span class="tag">비교</span>
+                            <span class="tag">추출</span>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="showSection('web')">
+                        <div class="card-icon"><i class="fas fa-globe"></i></div>
+                        <h3>웹 정보 수집</h3>
+                        <p>웹 페이지 내용을 분석하고, 최신 정보를 검색하여 문서화합니다.</p>
+                        <div class="card-tags">
+                            <span class="tag">크롤링</span>
+                            <span class="tag">검색</span>
+                            <span class="tag">분석</span>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="showSection('automation')">
+                        <div class="card-icon"><i class="fas fa-robot"></i></div>
+                        <h3>자동화</h3>
+                        <p>여러 파일 일괄 처리, 패턴 기반 수정 등 반복 작업을 자동화합니다.</p>
+                        <div class="card-tags">
+                            <span class="tag">일괄처리</span>
+                            <span class="tag">패턴</span>
+                            <span class="tag">스크립트</span>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="showSection('tips')">
+                        <div class="card-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h3>팁 & 트릭</h3>
+                        <p>Claude Code를 더 효율적으로 사용하기 위한 유용한 팁들을 확인하세요.</p>
+                        <div class="card-tags">
+                            <span class="tag">클립보드</span>
+                            <span class="tag">단축키</span>
+                            <span class="tag">효율</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Start Section -->
+        <section class="section" id="quickstart">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-rocket" style="color: var(--primary); margin-right: 12px;"></i>빠른 시작</h2>
+                    <p>4단계로 Claude Code 문서 작업을 시작하세요.</p>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-item open">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><span style="color: var(--primary); margin-right: 8px;">1</span> 작업 폴더 지정</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>먼저 작업할 폴더 경로를 알려주세요.</p>
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>명령어</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, '/Users/username/Desktop/project 경로에서 작업할거야')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "/Users/username/Desktop/project 경로에서 작업할거야"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><span style="color: var(--primary); margin-right: 8px;">2</span> 파일 확인</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>해당 폴더에 어떤 파일이 있는지 확인합니다.</p>
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>명령어</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, '이 폴더에 뭐 있어?')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "이 폴더에 뭐 있어?"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><span style="color: var(--primary); margin-right: 8px;">3</span> 작업 요청</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>원하는 작업을 자연어로 요청하세요.</p>
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>명령어</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, '이 PPT 파일 마크다운으로 변환해줘')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "이 PPT 파일 마크다운으로 변환해줘"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><span style="color: var(--primary); margin-right: 8px;">4</span> 결과 활용</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>결과물을 클립보드에 복사하거나 파일로 저장합니다.</p>
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>명령어</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, '클립보드에 복사해줘')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "클립보드에 복사해줘"
+                                    </div>
+                                </div>
+                                <div class="tip-box">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <div class="tip-content">
+                                        <h4>Pro Tip</h4>
+                                        <p>클립보드에 복사한 내용은 클릭업, 노션, 슬랙 등에 바로 붙여넣기(Cmd+V) 가능합니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convert PPT Section -->
+        <section class="section" id="convert-ppt">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-powerpoint" style="color: #D35230; margin-right: 12px;"></i>PPT → Markdown 변환</h2>
+                    <p>파워포인트 파일의 텍스트를 추출하여 마크다운 문서로 변환합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>기본 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 PPT 파일 마크다운으로 변환해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 기본 변환</span><br>
+                            "이 PPT 파일 마크다운으로 변환해줘"<br><br>
+                            <span class="comment"># 특정 파일 지정</span><br>
+                            "바이오스펙트럼_디자인요청서.pptx 내용 MD로 정리해줘"<br><br>
+                            <span class="comment"># 특정 슬라이드만</span><br>
+                            "PPT에서 3~5번 슬라이드만 추출해줘"
+                        </div>
+                    </div>
+
+                    <h3>변환 결과물</h3>
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>PPT 요소</th>
+                                <th>변환 결과</th>
+                            </tr>
+                            <tr>
+                                <td>슬라이드 제목</td>
+                                <td><code># 제목</code> 또는 <code>## 소제목</code></td>
+                            </tr>
+                            <tr>
+                                <td>본문 텍스트</td>
+                                <td>일반 텍스트 또는 리스트</td>
+                            </tr>
+                            <tr>
+                                <td>표</td>
+                                <td>마크다운 테이블</td>
+                            </tr>
+                            <tr>
+                                <td>이미지</td>
+                                <td>이미지 설명 텍스트</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="tip-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div class="tip-content">
+                            <h4>참고</h4>
+                            <p>PPT 내의 이미지는 텍스트로 변환되지 않지만, 이미지 파일을 별도로 분석해달라고 요청하면 내용을 설명해드릴 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convert PDF Section -->
+        <section class="section" id="convert-pdf">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-pdf" style="color: #E53935; margin-right: 12px;"></i>PDF → Markdown 변환</h2>
+                    <p>PDF 문서의 텍스트와 구조를 추출하여 마크다운으로 변환합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>기본 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 PDF 읽고 마크다운으로 정리해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 전체 변환</span><br>
+                            "이 PDF 읽고 마크다운으로 정리해줘"<br><br>
+                            <span class="comment"># 핵심만 추출</span><br>
+                            "계약서.pdf 핵심 내용만 추출해서 문서화해줘"<br><br>
+                            <span class="comment"># 특정 페이지</span><br>
+                            "PDF 5~10페이지만 정리해줘"
+                        </div>
+                    </div>
+
+                    <div class="tip-box warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="tip-content">
+                            <h4>주의사항</h4>
+                            <p>스캔된 이미지 형태의 PDF는 OCR 처리가 필요할 수 있으며, 복잡한 레이아웃은 수동 조정이 필요할 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convert Image Section -->
+        <section class="section" id="convert-image">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-image" style="color: var(--accent); margin-right: 12px;"></i>이미지 → 텍스트 (OCR)</h2>
+                    <p>스크린샷, 사진 등 이미지 속 텍스트를 추출하고 분석합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>기본 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 스크린샷에 있는 텍스트 추출해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 텍스트 추출</span><br>
+                            "이 스크린샷에 있는 텍스트 추출해줘"<br><br>
+                            <span class="comment"># 표 변환</span><br>
+                            "이미지 속 표 내용을 마크다운 테이블로 만들어줘"<br><br>
+                            <span class="comment"># 이미지 분석</span><br>
+                            "이 이미지가 무엇을 보여주는지 설명해줘"
+                        </div>
+                    </div>
+
+                    <h3>지원 형식</h3>
+                    <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="card" style="padding: 20px; text-align: center;">
+                            <i class="fas fa-file-image" style="font-size: 2rem; color: var(--primary); margin-bottom: 12px;"></i>
+                            <h3 style="font-size: 1rem;">PNG</h3>
+                        </div>
+                        <div class="card" style="padding: 20px; text-align: center;">
+                            <i class="fas fa-file-image" style="font-size: 2rem; color: var(--secondary); margin-bottom: 12px;"></i>
+                            <h3 style="font-size: 1rem;">JPG</h3>
+                        </div>
+                        <div class="card" style="padding: 20px; text-align: center;">
+                            <i class="fas fa-file-image" style="font-size: 2rem; color: var(--accent); margin-bottom: 12px;"></i>
+                            <h3 style="font-size: 1rem;">GIF</h3>
+                        </div>
+                        <div class="card" style="padding: 20px; text-align: center;">
+                            <i class="fas fa-file-image" style="font-size: 2rem; color: var(--success); margin-bottom: 12px;"></i>
+                            <h3 style="font-size: 1rem;">WebP</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convert Excel Section -->
+        <section class="section" id="convert-excel">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-excel" style="color: #217346; margin-right: 12px;"></i>Excel/CSV → 테이블 변환</h2>
+                    <p>스프레드시트 데이터를 마크다운 테이블로 변환합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>기본 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 엑셀 파일 마크다운 표로 변환해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># Excel 변환</span><br>
+                            "이 엑셀 파일 마크다운 표로 변환해줘"<br><br>
+                            <span class="comment"># CSV 변환</span><br>
+                            "data.csv 내용을 보기 좋게 정리해줘"<br><br>
+                            <span class="comment"># 특정 시트</span><br>
+                            "Sheet2의 데이터만 테이블로 만들어줘"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Document Create Section -->
+        <section class="section" id="doc-create">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle" style="color: var(--success); margin-right: 12px;"></i>새 문서 생성</h2>
+                    <p>다양한 형식의 문서를 자동으로 생성합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>문서 유형별 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '회의록 템플릿 만들어줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 회의록</span><br>
+                            "회의록 템플릿 만들어줘"<br><br>
+                            <span class="comment"># 기획서</span><br>
+                            "프로젝트 기획서 초안 작성해줘"<br><br>
+                            <span class="comment"># API 문서</span><br>
+                            "API 문서 형식으로 정리해줘"<br><br>
+                            <span class="comment"># README</span><br>
+                            "이 프로젝트용 README.md 만들어줘"
+                        </div>
+                    </div>
+
+                    <h3>생성 가능한 문서 유형</h3>
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fas fa-clipboard-list"></i></div>
+                            <h3>회의록</h3>
+                            <p>참석자, 안건, 논의사항, 액션아이템 등을 체계적으로 정리</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fas fa-project-diagram"></i></div>
+                            <h3>기획서</h3>
+                            <p>목표, 범위, 일정, 리소스 등을 포함한 프로젝트 기획 문서</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="fas fa-code"></i></div>
+                            <h3>기술 문서</h3>
+                            <p>API 문서, 아키텍처 문서, 설치 가이드 등</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-bug"></i></div>
+                            <h3>버그 리포트</h3>
+                            <p>재현 단계, 예상 동작, 실제 동작, 환경 정보 등</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Document Edit Section -->
+        <section class="section" id="doc-edit">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-pencil-alt" style="color: var(--warning); margin-right: 12px;"></i>문서 수정</h2>
+                    <p>기존 문서의 내용을 수정하고 개선합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>수정 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, 'README.md에 설치 방법 섹션 추가해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 섹션 추가</span><br>
+                            "README.md에 설치 방법 섹션 추가해줘"<br><br>
+                            <span class="comment"># 구조 변경</span><br>
+                            "이 문서 목차 구조 다시 잡아줘"<br><br>
+                            <span class="comment"># 내용 수정</span><br>
+                            "오타 수정하고 문장 다듬어줘"<br><br>
+                            <span class="comment"># 형식 변환</span><br>
+                            "이 리스트를 표 형식으로 바꿔줘"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Document Template Section -->
+        <section class="section" id="doc-template">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-copy" style="color: var(--primary); margin-right: 12px;"></i>템플릿 활용</h2>
+                    <p>자주 사용하는 문서 템플릿을 생성하고 활용합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>템플릿 생성</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '주간 보고서 템플릿 만들어줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 주간 보고서</span><br>
+                            "주간 보고서 템플릿 만들어줘"<br><br>
+                            <span class="comment"># 이슈 템플릿</span><br>
+                            "GitHub 이슈 템플릿 만들어줘"<br><br>
+                            <span class="comment"># PR 템플릿</span><br>
+                            "Pull Request 템플릿 생성해줘"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Section -->
+        <section class="section" id="analysis">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-search-plus" style="color: var(--accent); margin-right: 12px;"></i>문서 분석</h2>
+                    <p>문서 요약, 핵심 추출, 비교 분석 등을 수행합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>분석 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 문서 3줄로 요약해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 요약</span><br>
+                            "이 문서 3줄로 요약해줘"<br>
+                            "긴 보고서 핵심만 정리해줘"<br><br>
+                            <span class="comment"># 추출</span><br>
+                            "회의록에서 액션 아이템만 추출해줘"<br>
+                            "이 문서에서 날짜/일정 관련 내용만 뽑아줘"<br><br>
+                            <span class="comment"># 비교</span><br>
+                            "두 문서 차이점 비교해줘"<br>
+                            "버전1과 버전2 변경사항 정리해줘"
+                        </div>
+                    </div>
+
+                    <h3>분석 유형</h3>
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>유형</th>
+                                <th>설명</th>
+                                <th>예시 명령</th>
+                            </tr>
+                            <tr>
+                                <td><strong>요약</strong></td>
+                                <td>긴 문서의 핵심 내용을 짧게 정리</td>
+                                <td><code>"3문장으로 요약해줘"</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>추출</strong></td>
+                                <td>특정 정보만 선별하여 추출</td>
+                                <td><code>"담당자 이름만 추출해줘"</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>비교</strong></td>
+                                <td>두 문서 간 차이점 분석</td>
+                                <td><code>"v1과 v2 차이점 알려줘"</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>검증</strong></td>
+                                <td>문서 내 오류나 모순 확인</td>
+                                <td><code>"이 문서에 모순되는 내용 있어?"</code></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Web Section -->
+        <section class="section" id="web">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-globe" style="color: var(--primary); margin-right: 12px;"></i>웹 정보 수집</h2>
+                    <p>웹 페이지 분석과 최신 정보 검색을 통해 문서를 작성합니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>웹 관련 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 URL 내용 요약해줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># URL 분석</span><br>
+                            "이 URL 내용 요약해줘: https://example.com"<br>
+                            "경쟁사 웹사이트 3개 비교 분석해줘"<br><br>
+                            <span class="comment"># 정보 검색</span><br>
+                            "2024년 최신 React 트렌드 조사해서 정리해줘"<br>
+                            "Shopify 테마 추천 검색해서 문서로 만들어줘"
+                        </div>
+                    </div>
+
+                    <div class="tip-box warning">
+                        <i class="fas fa-lock"></i>
+                        <div class="tip-content">
+                            <h4>제한사항</h4>
+                            <p>로그인이 필요한 페이지나 비공개 콘텐츠는 접근할 수 없습니다. 공개된 웹 페이지만 분석 가능합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Automation Section -->
+        <section class="section" id="automation">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-magic" style="color: var(--secondary); margin-right: 12px;"></i>자동화</h2>
+                    <p>반복 작업을 자동화하여 효율을 높입니다.</p>
+                </div>
+
+                <div class="command-section">
+                    <h3>자동화 명령어</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span>예시</span>
+                            <button class="copy-btn" onclick="copyCommand(this, '이 폴더의 모든 md 파일 하나로 합쳐줘')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-content">
+                            <span class="comment"># 파일 병합</span><br>
+                            "이 폴더의 모든 md 파일 하나로 합쳐줘"<br><br>
+                            <span class="comment"># 일괄 분석</span><br>
+                            "images 폴더 이미지들 분석해서 목록 만들어줘"<br><br>
+                            <span class="comment"># 일괄 수정</span><br>
+                            "모든 문서에서 '주식회사'를 '(주)'로 변경해줘"<br><br>
+                            <span class="comment"># 파일명 변경</span><br>
+                            "파일명에 날짜 prefix 붙여줘"
+                        </div>
+                    </div>
+
+                    <h3>자동화 가능한 작업</h3>
+                    <div class="feature-list">
+                        <div class="feature-item available">
+                            <i class="fas fa-check-circle"></i>
+                            <span>여러 파일 일괄 변환</span>
+                        </div>
+                        <div class="feature-item available">
+                            <i class="fas fa-check-circle"></i>
+                            <span>텍스트 일괄 치환</span>
+                        </div>
+                        <div class="feature-item available">
+                            <i class="fas fa-check-circle"></i>
+                            <span>파일명 일괄 변경</span>
+                        </div>
+                        <div class="feature-item available">
+                            <i class="fas fa-check-circle"></i>
+                            <span>폴더 구조 생성</span>
+                        </div>
+                        <div class="feature-item available">
+                            <i class="fas fa-check-circle"></i>
+                            <span>데이터 추출 및 정리</span>
+                        </div>
+                        <div class="feature-item available">
+                            <i class="fas fa-check-circle"></i>
+                            <span>문서 병합</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section class="section" id="examples">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-lightbulb" style="color: var(--warning); margin-right: 12px;"></i>실전 예시</h2>
+                    <p>실제 업무에서 활용할 수 있는 예시들입니다.</p>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><i class="fas fa-users" style="color: var(--primary); margin-right: 12px;"></i>회의록 정리</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>입력 예시</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, `오늘 회의 내용이야:
+- 참석자: 김대리, 박과장, 이부장
+- 주제: 신규 프로젝트 킥오프
+- 논의사항: 일정, 예산, 담당자 배정
+- 결정사항: 12월 말까지 1차 완료
+회의록 형식으로 정리해줘`)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "오늘 회의 내용이야:<br>
+                                        - 참석자: 김대리, 박과장, 이부장<br>
+                                        - 주제: 신규 프로젝트 킥오프<br>
+                                        - 논의사항: 일정, 예산, 담당자 배정<br>
+                                        - 결정사항: 12월 말까지 1차 완료<br>
+                                        회의록 형식으로 정리해줘"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><i class="fas fa-file-alt" style="color: var(--success); margin-right: 12px;"></i>기획서 작성</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>입력 예시</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, `다음 내용으로 기획서 작성해줘:
+- 프로젝트명: 쇼핑몰 리뉴얼
+- 목표: UX 개선 및 전환율 향상
+- 범위: 메인페이지, 상품상세, 장바구니
+- 대상: 20-40대 여성
+마크다운으로 섹션 나눠서 작성해줘`)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "다음 내용으로 기획서 작성해줘:<br>
+                                        - 프로젝트명: 쇼핑몰 리뉴얼<br>
+                                        - 목표: UX 개선 및 전환율 향상<br>
+                                        - 범위: 메인페이지, 상품상세, 장바구니<br>
+                                        - 대상: 20-40대 여성<br>
+                                        마크다운으로 섹션 나눠서 작성해줘"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><i class="fas fa-code" style="color: var(--secondary); margin-right: 12px;"></i>API 문서화</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>입력 예시</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, '이 JSON 데이터를 API 문서 형식으로 정리해줘')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "이 JSON 데이터를 API 문서 형식으로 정리해줘"<br><br>
+                                        "DB 스키마 보고 ERD 설명 문서 만들어줘"<br><br>
+                                        "이 함수들 JSDoc 형식으로 문서화해줘"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4><i class="fas fa-chart-line" style="color: var(--accent); margin-right: 12px;"></i>경쟁사 분석</h4>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="command-box">
+                                    <div class="command-header">
+                                        <span>입력 예시</span>
+                                        <button class="copy-btn" onclick="copyCommand(this, `다음 3개 웹사이트 비교 분석해서 표로 정리해줘:
+- https://competitor1.com
+- https://competitor2.com
+- https://competitor3.com
+UI/UX, 기능, 가격 정책 위주로`)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="command-content">
+                                        "다음 3개 웹사이트 비교 분석해서 표로 정리해줘:<br>
+                                        - https://competitor1.com<br>
+                                        - https://competitor2.com<br>
+                                        - https://competitor3.com<br>
+                                        UI/UX, 기능, 가격 정책 위주로"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips Section -->
+        <section class="section" id="tips">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-star" style="color: var(--warning); margin-right: 12px;"></i>유용한 팁</h2>
+                    <p>Claude Code를 더 효율적으로 사용하는 방법들입니다.</p>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>팁</th>
+                            <th>명령어 예시</th>
+                            <th>설명</th>
+                        </tr>
+                        <tr>
+                            <td><strong>작업 경로 지정</strong></td>
+                            <td><code>"~/Desktop/project 경로에서 작업할거야"</code></td>
+                            <td>모든 작업의 기준 폴더 설정</td>
+                        </tr>
+                        <tr>
+                            <td><strong>표 형식 출력</strong></td>
+                            <td><code>"표 형식으로 정리해줘"</code></td>
+                            <td>데이터를 보기 좋은 테이블로</td>
+                        </tr>
+                        <tr>
+                            <td><strong>클립보드 복사</strong></td>
+                            <td><code>"클립보드에 복사해줘"</code></td>
+                            <td>결과물 바로 붙여넣기 가능</td>
+                        </tr>
+                        <tr>
+                            <td><strong>파일명 지정</strong></td>
+                            <td><code>"파일명은 YYYYMMDD_제목.md로 해줘"</code></td>
+                            <td>원하는 형식으로 저장</td>
+                        </tr>
+                        <tr>
+                            <td><strong>출력 위치 지정</strong></td>
+                            <td><code>"output 폴더에 저장해줘"</code></td>
+                            <td>결과물 저장 위치 지정</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="tip-box">
+                    <i class="fas fa-terminal"></i>
+                    <div class="tip-content">
+                        <h4>터미널 클립보드 복사 (Mac)</h4>
+                        <p><code>cat 파일명.md | pbcopy</code> 명령으로 파일 내용을 클립보드에 바로 복사할 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Limits Section -->
+        <section class="section" id="limits">
+            <div class="content">
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle" style="color: var(--accent); margin-right: 12px;"></i>가능/불가능한 것</h2>
+                    <p>Claude Code의 기능 범위를 확인하세요.</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div>
+                        <h3 style="color: var(--success); margin-bottom: 16px;"><i class="fas fa-check-circle" style="margin-right: 8px;"></i>가능한 것</h3>
+                        <div class="feature-list" style="grid-template-columns: 1fr;">
+                            <div class="feature-item available">
+                                <i class="fas fa-check-circle"></i>
+                                <span>로컬 파일 읽기/쓰기</span>
+                            </div>
+                            <div class="feature-item available">
+                                <i class="fas fa-check-circle"></i>
+                                <span>웹 검색 및 URL 조회</span>
+                            </div>
+                            <div class="feature-item available">
+                                <i class="fas fa-check-circle"></i>
+                                <span>터미널 명령어 실행</span>
+                            </div>
+                            <div class="feature-item available">
+                                <i class="fas fa-check-circle"></i>
+                                <span>이미지 내용 분석</span>
+                            </div>
+                            <div class="feature-item available">
+                                <i class="fas fa-check-circle"></i>
+                                <span>PDF 문서 읽기</span>
+                            </div>
+                            <div class="feature-item available">
+                                <i class="fas fa-check-circle"></i>
+                                <span>코드 작성 및 수정</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--danger); margin-bottom: 16px;"><i class="fas fa-times-circle" style="margin-right: 8px;"></i>불가능한 것</h3>
+                        <div class="feature-list" style="grid-template-columns: 1fr;">
+                            <div class="feature-item unavailable">
+                                <i class="fas fa-times-circle"></i>
+                                <span>외부 앱 제어 (카톡, 슬랙 등)</span>
+                            </div>
+                            <div class="feature-item unavailable">
+                                <i class="fas fa-times-circle"></i>
+                                <span>로그인 필요한 페이지 접근</span>
+                            </div>
+                            <div class="feature-item unavailable">
+                                <i class="fas fa-times-circle"></i>
+                                <span>GUI 프로그램 조작</span>
+                            </div>
+                            <div class="feature-item unavailable">
+                                <i class="fas fa-times-circle"></i>
+                                <span>이미지 생성/편집</span>
+                            </div>
+                            <div class="feature-item unavailable">
+                                <i class="fas fa-times-circle"></i>
+                                <span>실시간 화면 공유</span>
+                            </div>
+                            <div class="feature-item unavailable">
+                                <i class="fas fa-times-circle"></i>
+                                <span>이메일/메시지 전송</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">클립보드에 복사되었습니다</span>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modalTitle">도움말</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toggle folder
+        function toggleFolder(folder) {
+            event.stopPropagation();
+            folder.classList.toggle('open');
+        }
+
+        // Toggle accordion
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            item.classList.toggle('open');
+        }
+
+        // Toggle sidebar (mobile)
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Copy command
+        function copyCommand(btn, text) {
+            event.stopPropagation();
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                showToast('클립보드에 복사되었습니다');
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
+                }, 2000);
+            });
+        }
+
+        // Show toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Open modal
+        function openModal(type) {
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            if (type === 'help') {
+                title.textContent = '도움말';
+                body.innerHTML = `
+                    <h4 style="margin-bottom: 12px;">Claude Code란?</h4>
+                    <p style="color: var(--gray); margin-bottom: 20px;">Claude Code는 Anthropic의 CLI 기반 AI 어시스턴트입니다. 파일 작업, 코드 작성, 문서 생성 등 다양한 작업을 자연어로 요청할 수 있습니다.</p>
+
+                    <h4 style="margin-bottom: 12px;">기본 사용법</h4>
+                    <ol style="color: var(--gray); padding-left: 20px;">
+                        <li style="margin-bottom: 8px;">작업 폴더 경로를 알려주세요</li>
+                        <li style="margin-bottom: 8px;">원하는 작업을 자연어로 요청하세요</li>
+                        <li style="margin-bottom: 8px;">결과물을 파일로 저장하거나 클립보드에 복사하세요</li>
+                    </ol>
+                `;
+            } else if (type === 'shortcut') {
+                title.textContent = '유용한 단축키';
+                body.innerHTML = `
+                    <div style="display: grid; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <span>클립보드 복사 (Mac)</span>
+                            <code style="background: var(--dark); padding: 4px 8px; border-radius: 4px;">Cmd + C</code>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <span>붙여넣기</span>
+                            <code style="background: var(--dark); padding: 4px 8px; border-radius: 4px;">Cmd + V</code>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <span>PDF로 저장 (브라우저)</span>
+                            <code style="background: var(--dark); padding: 4px 8px; border-radius: 4px;">Cmd + P</code>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <span>파일 복사 → 클립보드</span>
+                            <code style="background: var(--dark); padding: 4px 8px; border-radius: 4px;">cat file | pbcopy</code>
+                        </div>
+                    </div>
+                `;
+            }
+
+            overlay.classList.add('show');
+        }
+
+        // Close modal
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById('modalOverlay')) {
+                document.getElementById('modalOverlay').classList.remove('show');
+            }
+        }
+
+        // Search handler
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = event.target.value.toLowerCase();
+                showToast(`"${query}" 검색 중...`);
+                // Search logic could be implemented here
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

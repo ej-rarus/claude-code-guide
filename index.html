@@ -2744,13 +2744,14 @@ UI/UX, 기능, 가격 정책 위주로`)">
             document.getElementById('sidebar').classList.toggle('open');
         }
 
-        // Copy command
+        // Copy command (with fallback for file:// protocol)
         function copyCommand(btn, text, e) {
             if (e) e.stopPropagation();
             else if (typeof event !== 'undefined' && event) event.stopPropagation();
 
             const originalHTML = btn.innerHTML;
-            navigator.clipboard.writeText(text).then(() => {
+
+            function onSuccess() {
                 btn.classList.add('copied');
                 btn.innerHTML = '<i class="fas fa-check"></i> 복사됨';
                 showToast('클립보드에 복사되었습니다');
@@ -2758,10 +2759,34 @@ UI/UX, 기능, 가격 정책 위주로`)">
                     btn.classList.remove('copied');
                     btn.innerHTML = originalHTML;
                 }, 2000);
-            }).catch(err => {
-                console.error('복사 실패:', err);
-                showToast('복사에 실패했습니다. 다시 시도해주세요.');
-            });
+            }
+
+            function onError() {
+                showToast('복사에 실패했습니다. 직접 선택해서 복사해주세요.');
+            }
+
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(onSuccess).catch(onError);
+            } else {
+                // Fallback for file:// protocol or non-secure contexts
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    onSuccess();
+                } catch (err) {
+                    console.error('복사 실패:', err);
+                    onError();
+                }
+                document.body.removeChild(textArea);
+            }
         }
 
         // Show toast

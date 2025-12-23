@@ -1595,7 +1595,7 @@ brew --version
                         <div class="command-box" style="margin-top: 12px;">
                             <div class="command-header">
                                 <span>📋 추가 설정</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'echo \'export PATH=/opt/homebrew/bin:$PATH\' >> ~/.zshrc && source ~/.zshrc')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1603,6 +1603,19 @@ brew --version
 echo 'export PATH=/opt/homebrew/bin:$PATH' >> ~/.zshrc && source ~/.zshrc
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="tip-box info" style="margin-top: 20px;">
+                    <i class="fas fa-sync-alt"></i>
+                    <div class="tip-content">
+                        <h4>⚠️ 터미널 재시작 필요!</h4>
+                        <p>Homebrew 설치 후 <span class="emphasis">터미널을 완전히 종료했다가 다시 열어주세요.</span></p>
+                        <ul style="margin-top: 8px; color: var(--gray);">
+                            <li>터미널 창을 닫는 것만으로는 부족합니다</li>
+                            <li><strong>⌘ + Q</strong>를 눌러 터미널 앱 자체를 종료하세요</li>
+                            <li>다시 터미널(또는 iTerm2)을 열고 다음 단계를 진행하세요</li>
+                        </ul>
                     </div>
                 </div>
 
@@ -1735,6 +1748,13 @@ brew install --cask claude-code
                             </div>
                         </div>
                         <p style="margin-top: 16px;">2-3분 기다리면 설치 완료!</p>
+                        <div class="tip-box info" style="margin-top: 16px;">
+                            <i class="fas fa-sync-alt"></i>
+                            <div class="tip-content">
+                                <h4>⚠️ 터미널 재시작 필요!</h4>
+                                <p>설치 후 <span class="emphasis">터미널을 완전히 종료(⌘ + Q)했다가 다시 열어주세요.</span> 그래야 <code>claude</code> 명령어가 인식됩니다.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="step-card">

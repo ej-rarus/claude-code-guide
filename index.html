@@ -1547,7 +1547,7 @@
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 이 명령어를 복사하세요</span>
-                                <button class="copy-btn" onclick="copyCommand(this, '/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1575,7 +1575,7 @@
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 이 명령어로 확인하세요</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'brew --version')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1639,7 +1639,7 @@ echo 'export PATH=/opt/homebrew/bin:$PATH' >> ~/.zshrc && source ~/.zshrc
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 터미널에 이 명령어를 입력하세요</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'brew install --cask iterm2')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1726,7 +1726,7 @@ brew install --cask iterm2
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 Claude 설치 명령어</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'brew install --cask claude-code')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1764,7 +1764,7 @@ brew install --cask claude-code
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 로그인 명령어</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'claude auth login')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1787,7 +1787,7 @@ claude auth login
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 Claude 실행</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'claude')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -1841,7 +1841,7 @@ claude
                         <div class="command-box">
                             <div class="command-header">
                                 <span>📋 Claude 시작하기</span>
-                                <button class="copy-btn" onclick="copyCommand(this, 'claude')">
+                                <button class="copy-btn" onclick="copyCommand(this)">
                                     <i class="fas fa-copy"></i> 복사
                                 </button>
                             </div>
@@ -2748,6 +2748,22 @@ UI/UX, 기능, 가격 정책 위주로`)">
         function copyCommand(btn, text, e) {
             if (e) e.stopPropagation();
             else if (typeof event !== 'undefined' && event) event.stopPropagation();
+
+            // If text not provided, get from sibling .command-content
+            if (!text) {
+                const commandBox = btn.closest('.command-box');
+                if (commandBox) {
+                    const contentEl = commandBox.querySelector('.command-content');
+                    if (contentEl) {
+                        text = contentEl.textContent.trim();
+                    }
+                }
+            }
+
+            if (!text) {
+                showToast('복사할 내용을 찾을 수 없습니다.');
+                return;
+            }
 
             const originalHTML = btn.innerHTML;
 
